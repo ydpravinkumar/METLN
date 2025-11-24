@@ -5,3 +5,5 @@ plotly
 openpyxl
 python-dateutil
 pyarrow
+plotly
+geopy
