@@ -1,6 +1,7 @@
 streamlit
 pandas
-plotly
-matplotlib
 numpy
+plotly
 openpyxl
+python-dateutil
+pyarrow
