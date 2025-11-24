@@ -227,31 +227,36 @@ if uploaded_files:
     # Filter data
     current = data[data["Status"].str.upper().isin(status_filter)].copy()
 
-    # ----------------------------
-    # 1: Active Subs by State
-    # ----------------------------
-    st.subheader("Active Subscriptions by State")
-
-    subsByState = (
-        current.groupby("State")["AccoutID"]
-        .nunique()
-        .sort_values(ascending=False)
-    )
-
-    fig1 = px.bar(
-        subsByState.head(20),
-        x=subsByState.head(20).index,
-        y=subsByState.head(20).values,
-        labels={"x": "State", "y": "Active Accounts"}
-    )
-
-    st.plotly_chart(fig1, use_container_width=True)
+    # # ----------------------------
+    # # 1: Active Subs by State
+    # # ----------------------------
+    # st.subheader("Active Subscriptions by State")
+    #
+    # subsByState = (
+    #     current.groupby("State")["AccoutID"]
+    #     .nunique()
+    #     .sort_values(ascending=False)
+    # )
+    #
+    # fig1 = px.bar(
+    #     subsByState.head(20),
+    #     x=subsByState.head(20).index,
+    #     y=subsByState.head(20).values,
+    #     labels={"x": "State", "y": "Active Accounts"}
+    # )
+    #
+    # st.plotly_chart(fig1, use_container_width=True)
 
     # ----------------------------
     # 2: Top Cities by Subscribers
     # ----------------------------
-    st.subheader("Top 20 Cities by Active Shareholders")
-
+    st.subheader("Top 20 Cities by Active Subscribers")
+    data['City'] = (
+        data['City']
+        .astype(str)
+        .str.strip()  # remove spaces
+        .str.title()  # convert to Title Case: "PORTLAND" → "Portland"
+    )
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
@@ -289,32 +294,6 @@ if uploaded_files:
     )
 
     st.plotly_chart(fig3, use_container_width=True)
-
-    # ----------------------------
-    # 4: Subscribers Over Time by Type
-    # ----------------------------
-    # st.subheader("Subscribers Over Time by Subscription Type")
-    #
-    # subsTimeType = (
-    #     valid.groupby(["YearMonth", "SubType"])["AccoutID"]
-    #     .nunique()
-    #     .reset_index()
-    # )
-    #
-    # pivot = subsTimeType.pivot(
-    #     index="YearMonth",
-    #     columns="SubType",
-    #     values="AccoutID"
-    # ).fillna(0)
-    #
-    # fig4 = px.line(
-    #     pivot,
-    #     x=pivot.index.astype(str),
-    #     y=pivot.columns,
-    #     labels={"x": "Year-Month", "value": "Subscribers"}
-    # )
-    #
-    # st.plotly_chart(fig4, use_container_width=True)
 
     # ----------------------------
     # Subscribers Over Time by Subscription Type (Separate Charts)
