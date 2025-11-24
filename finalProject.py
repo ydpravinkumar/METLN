@@ -162,6 +162,13 @@ if uploaded_files:
 
     valid = data.dropna(subset=["LastStartDate"]).copy()
     valid["YearMonth"] = valid["LastStartDate"].dt.to_period("M")
+    # Convert Period to datetime for filtering
+    valid["YearMonth_dt"] = valid["YearMonth"].dt.to_timestamp()
+
+    # Filter between 2015 and today
+    valid = valid[
+        valid["YearMonth_dt"] >= pd.Timestamp("2015-01-01")
+        ]
 
     subsOverTime = (
         valid.groupby(["YearMonth", "AccoutID"])
@@ -189,25 +196,20 @@ if uploaded_files:
         .reset_index()
     )
 
-    # Convert YearMonth → string (for Plotly)
-    subsTimeType["YearMonth"] = subsTimeType["YearMonth"].astype(str)
+    pivot = subsTimeType.pivot(
+        index="YearMonth",
+        columns="SubType",
+        values="AccoutID"
+    ).fillna(0)
 
-    sub_types = subsTimeType["SubType"].unique()
+    fig4 = px.line(
+        pivot,
+        x=pivot.index.astype(str),
+        y=pivot.columns,
+        labels={"x": "Year-Month", "value": "Subscribers"},
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
-    # Display each subscription type as its own chart
-    for subtype in sub_types:
-        st.write(f"### {subtype} Subscribers Over Time")
-
-        df_sub = subsTimeType[subsTimeType["SubType"] == subtype]
-
-        fig = px.line(
-            df_sub,
-            x="YearMonth",
-            y="AccoutID",
-            labels={"YearMonth": "Year-Month", "AccoutID": "Subscribers"},
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
 
 
 else:
