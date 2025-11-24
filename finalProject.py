@@ -293,6 +293,32 @@ if uploaded_files:
     # ----------------------------
     # 4: Subscribers Over Time by Type
     # ----------------------------
+    # st.subheader("Subscribers Over Time by Subscription Type")
+    #
+    # subsTimeType = (
+    #     valid.groupby(["YearMonth", "SubType"])["AccoutID"]
+    #     .nunique()
+    #     .reset_index()
+    # )
+    #
+    # pivot = subsTimeType.pivot(
+    #     index="YearMonth",
+    #     columns="SubType",
+    #     values="AccoutID"
+    # ).fillna(0)
+    #
+    # fig4 = px.line(
+    #     pivot,
+    #     x=pivot.index.astype(str),
+    #     y=pivot.columns,
+    #     labels={"x": "Year-Month", "value": "Subscribers"}
+    # )
+    #
+    # st.plotly_chart(fig4, use_container_width=True)
+
+    # ----------------------------
+    # Subscribers Over Time by Subscription Type (Separate Charts)
+    # ----------------------------
     st.subheader("Subscribers Over Time by Subscription Type")
 
     subsTimeType = (
@@ -301,20 +327,26 @@ if uploaded_files:
         .reset_index()
     )
 
-    pivot = subsTimeType.pivot(
-        index="YearMonth",
-        columns="SubType",
-        values="AccoutID"
-    ).fillna(0)
+    # Convert YearMonth → string (for Plotly)
+    subsTimeType["YearMonth"] = subsTimeType["YearMonth"].astype(str)
 
-    fig4 = px.line(
-        pivot,
-        x=pivot.index.astype(str),
-        y=pivot.columns,
-        labels={"x": "Year-Month", "value": "Subscribers"}
-    )
+    sub_types = subsTimeType["SubType"].unique()
 
-    st.plotly_chart(fig4, use_container_width=True)
+    # Display each subscription type as its own chart
+    for subtype in sub_types:
+        st.write(f"### {subtype} Subscribers Over Time")
+
+        df_sub = subsTimeType[subsTimeType["SubType"] == subtype]
+
+        fig = px.line(
+            df_sub,
+            x="YearMonth",
+            y="AccoutID",
+            labels={"YearMonth": "Year-Month", "AccoutID": "Subscribers"},
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
 
 else:
     st.info("Upload one or more CSV/XLSX files to begin.")
