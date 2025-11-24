@@ -255,9 +255,9 @@ if uploaded_files:
         data['City']
         .astype(str)
         .str.strip()  # remove spaces
-        .str.title()  # convert to Title Case: "PORTLAND" → "Portland"
+        .str.title()
     )
-    print(current['City'].unique())
+    # print(current['City'].unique())
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
