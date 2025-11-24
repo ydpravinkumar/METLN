@@ -251,12 +251,13 @@ if uploaded_files:
     # 2: Top Cities by Subscribers
     # ----------------------------
     st.subheader("Top 20 Cities by Active Subscribers")
-    data['City'] = (
+    current = (
         data['City']
         .astype(str)
         .str.strip()  # remove spaces
         .str.title()  # convert to Title Case: "PORTLAND" → "Portland"
     )
+    print(current['City'].unique())
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
