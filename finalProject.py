@@ -215,7 +215,12 @@ if uploaded_files:
             return "Other"
 
     data["SubType"] = data.apply(classifySubscription, axis=1)
-
+    data["City"] = (
+        data["City"]
+        .astype(str)
+        .str.strip()
+        .str.title()
+    )
     # Sidebar Filters
     st.sidebar.header("Filters")
     status_filter = st.sidebar.multiselect(
@@ -252,12 +257,7 @@ if uploaded_files:
     # ----------------------------
     st.subheader("Top 20 Cities by Active Subscribers")
     # print(current['City'].unique())
-    data["City"] = (
-        data["City"]
-        .astype(str)
-        .str.strip()
-        .str.title()
-    )
+
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
