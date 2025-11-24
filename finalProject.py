@@ -167,7 +167,7 @@ if uploaded_files:
 
     # Filter between 2015 and today
     valid = valid[
-        valid["YearMonth_dt"] >= pd.Timestamp("2015-01-01")
+        valid["YearMonth_dt"] >= pd.Timestamp("2019-01-01")
         ]
 
     subsOverTime = (
