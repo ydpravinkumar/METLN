@@ -251,18 +251,20 @@ if uploaded_files:
     # 2: Top Cities by Subscribers
     # ----------------------------
     st.subheader("Top 20 Cities by Active Subscribers")
-    current = (
-        data['City']
+    # print(current['City'].unique())
+    data["City"] = (
+        data["City"]
         .astype(str)
-        .str.strip()  # remove spaces
+        .str.strip()
         .str.title()
     )
-    # print(current['City'].unique())
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
         .sort_values(ascending=False)
     )
+
+
 
     fig2 = px.bar(
         subByCity.head(20),
