@@ -143,30 +143,30 @@ if uploaded_files:
     #
     # st.plotly_chart(fig, use_container_width=True)
 
-    import json
-
-    with open("Maine.geojson", "r") as f:
-        maine_geo = json.load(f)
-
-    fig = px.choropleth_mapbox(
-        geojson=maine_geo,
-        locations=["Maine"],
-        featureidkey="properties.name",
-        color=["Maine"],
-        center={"lat": 45.0, "lon": -69.0},
-        zoom=5.5,
-        mapbox_style="carto-positron",
-        opacity=0.15
+    fig = px.scatter_mapbox(
+        city_df,
+        lat="Lat",
+        lon="Lon",
+        size="Subscribers",
+        color="Subscribers",
+        hover_name="City",
+        zoom=6,
+        mapbox_style="open-street-map",  # closest to ArcGIS
+        height=650
     )
 
-    # Add your subscriber points
-    fig.add_scattermapbox(
-        lat=city_df["Lat"],
-        lon=city_df["Lon"],
-        mode="markers",
-        marker=dict(size=city_df["Subscribers"] / 50),
-        text=city_df["City"],
-        hoverinfo="text"
+    # Restrict view to the Maine bounding box
+    fig.update_layout(
+        mapbox=dict(
+            center={"lat": 45.2, "lon": -69.1},
+            zoom=6,
+            bounds={
+                "west": -71.5,
+                "east": -66.8,
+                "south": 42.9,
+                "north": 47.6
+            }
+        )
     )
 
     st.plotly_chart(fig, use_container_width=True)
