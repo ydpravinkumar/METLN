@@ -143,26 +143,28 @@ if uploaded_files:
     #
     # st.plotly_chart(fig, use_container_width=True)
 
-    # Maine geojson
-    url = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/maine.geojson"
-    maine_geo = requests.get(url).json()
+    import json
+
+    with open("Maine.geojson", "r") as f:
+        maine_geo = json.load(f)
 
     fig = px.choropleth_mapbox(
         geojson=maine_geo,
-        locations=[0],  # dummy for outline
-        color=[0],  # dummy
+        locations=["Maine"],
+        featureidkey="properties.name",
+        color=["Maine"],
+        center={"lat": 45.0, "lon": -69.0},
+        zoom=5.5,
         mapbox_style="carto-positron",
-        opacity=0.2,
-        zoom=5.6,
-        center={"lat": 45.07, "lon": -69.0}
+        opacity=0.15
     )
 
-    # Add your cities
+    # Add your subscriber points
     fig.add_scattermapbox(
         lat=city_df["Lat"],
         lon=city_df["Lon"],
         mode="markers",
-        marker=dict(size=city_df["Subscribers"] / 80),
+        marker=dict(size=city_df["Subscribers"] / 50),
         text=city_df["City"],
         hoverinfo="text"
     )
