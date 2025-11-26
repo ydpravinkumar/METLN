@@ -91,27 +91,15 @@ if uploaded_files:
         return None, None
 
 
+    import json
+    import requests
+
+
+
     # 2: Top Cities by Subscribers
     # ----------------------------
     st.subheader("Top 20 Cities by Active Subscribers")
-    # print(current['City'].unique())
 
-    # subByCity = (
-    #     current.groupby("City")["AccoutID"]
-    #     .nunique()
-    #     .sort_values(ascending=False)
-    # )
-    #
-    #
-    #
-    # fig2 = px.bar(
-    #     subByCity.head(20),
-    #     x=subByCity.head(20).index,
-    #     y=subByCity.head(20).values,
-    #     labels={"x": "City", "y": "Active Accounts"},
-    # )
-    #
-    # st.plotly_chart(fig2, use_container_width=True)
 
     # Group
     subByCity = (
@@ -140,17 +128,43 @@ if uploaded_files:
     # Drop empty coordinates
     city_df = city_df.dropna(subset=["Lat", "Lon"])
 
-    # Plot the map
-    fig = px.scatter_mapbox(
-        city_df,
-        lat="Lat",
-        lon="Lon",
-        size="Subscribers",
-        color="Subscribers",
-        hover_name="City",
-        zoom=6.5,
+    # # Plot the map
+    # fig = px.scatter_mapbox(
+    #     city_df,
+    #     lat="Lat",
+    #     lon="Lon",
+    #     size="Subscribers",
+    #     color="Subscribers",
+    #     hover_name="City",
+    #     zoom=6.5,
+    #     mapbox_style="carto-positron",
+    #     height=600,
+    # )
+    #
+    # st.plotly_chart(fig, use_container_width=True)
+
+    # Maine geojson
+    url = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/maine.geojson"
+    maine_geo = requests.get(url).json()
+
+    fig = px.choropleth_mapbox(
+        geojson=maine_geo,
+        locations=[0],  # dummy for outline
+        color=[0],  # dummy
         mapbox_style="carto-positron",
-        height=600,
+        opacity=0.2,
+        zoom=5.6,
+        center={"lat": 45.07, "lon": -69.0}
+    )
+
+    # Add your cities
+    fig.add_scattermapbox(
+        lat=city_df["Lat"],
+        lon=city_df["Lon"],
+        mode="markers",
+        marker=dict(size=city_df["Subscribers"] / 80),
+        text=city_df["City"],
+        hoverinfo="text"
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -214,4 +228,7 @@ if uploaded_files:
 
 else:
     st.info("Upload one or more CSV/XLSX files to begin.")
+
+
+
 
