@@ -376,8 +376,8 @@ if uploaded_files:
     valid["YearMonth"] = valid["LastStartDate"].dt.to_period("M")
     valid["YearMonth_dt"] = valid["YearMonth"].dt.to_timestamp()
 
-    # Filter from 2015 onwards
-    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2015-01-01")]
+    # Filter from 2018 onwards
+    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2018-01-01")]
 
     subsOverTime = (
         valid.groupby(["YearMonth", "AccoutID"])
