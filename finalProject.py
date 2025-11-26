@@ -330,10 +330,11 @@ if uploaded_files:
     # 2: Top Cities by Subscribers (Map)
     # ----------------------------
     # ----------------------------
-    # Interactive Maine Map (Fully Interactive)
+    # Bar Chart: Top 20 Cities by Active Subscribers
     # ----------------------------
-    st.subheader("🗺️ Top 20 Cities by Active Subscribers in Maine")
+    st.subheader("🏙️ Top 20 Cities by Active Subscribers")
 
+    # Group by city
     subByCity = (
         current.groupby("City")["AccoutID"]
         .nunique()
@@ -341,38 +342,30 @@ if uploaded_files:
         .head(20)
     )
 
+    # Convert to dataframe
     city_df = subByCity.reset_index()
     city_df.columns = ["City", "Subscribers"]
 
-    # Add coordinates
-    city_df["Lat"] = city_df["City"].apply(lambda c: get_coordinates(c)[0])
-    city_df["Lon"] = city_df["City"].apply(lambda c: get_coordinates(c)[1])
-
-    city_df = city_df.dropna(subset=["Lat", "Lon"])
-
-    # Use mapbox token (public demo token)
-    px.set_mapbox_access_token(
-        "pk.eyJ1IjoiZHJ5bWFwYm94IiwiYSI6ImNqZ3kzMnIzdTAwMnMycXA0b3FhY3ZpZ2gifQ.yKkeN4QH-5oSmw9DbLuZLw"
-    )
-
-    fig = px.scatter_mapbox(
+    # Bar chart
+    fig_bar = px.bar(
         city_df,
-        lat="Lat",
-        lon="Lon",
-        size="Subscribers",
+        x="Subscribers",
+        y="City",
+        orientation="h",
         color="Subscribers",
-        hover_name="City",
-        hover_data={"Lat": False, "Lon": False},
-        zoom=5.5,
-        height=650,
+        color_continuous_scale="Blues",
+        labels={"Subscribers": "Active Subscribers", "City": "City"},
+        title="Top 20 Cities by Subscriber Count",
+        height=650
     )
 
-    fig.update_layout(
-        mapbox_style="streets",
-        margin=dict(l=0, r=0, t=0, b=0),
+    fig_bar.update_layout(
+        yaxis=dict(categoryorder="total ascending"),
+        margin=dict(l=20, r=20, t=60, b=20),
+        coloraxis_showscale=False
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
 
     # ----------------------------
     # 3: Subscribers Over Time
