@@ -329,6 +329,9 @@ if uploaded_files:
     # ----------------------------
     # 2: Top Cities by Subscribers (Map)
     # ----------------------------
+    # ----------------------------
+    # Interactive Maine Map (Fully Interactive)
+    # ----------------------------
     st.subheader("🗺️ Top 20 Cities by Active Subscribers in Maine")
 
     subByCity = (
@@ -347,7 +350,11 @@ if uploaded_files:
 
     city_df = city_df.dropna(subset=["Lat", "Lon"])
 
-    # Plot map
+    # Use mapbox token (public demo token)
+    px.set_mapbox_access_token(
+        "pk.eyJ1IjoiZHJ5bWFwYm94IiwiYSI6ImNqZ3kzMnIzdTAwMnMycXA0b3FhY3ZpZ2gifQ.yKkeN4QH-5oSmw9DbLuZLw"
+    )
+
     fig = px.scatter_mapbox(
         city_df,
         lat="Lat",
@@ -356,23 +363,12 @@ if uploaded_files:
         color="Subscribers",
         hover_name="City",
         hover_data={"Lat": False, "Lon": False},
-        zoom=6,
-        mapbox_style="open-street-map",
+        zoom=5.5,
         height=650,
     )
 
-    # Maine viewport lock
     fig.update_layout(
-        mapbox=dict(
-            center={"lat": 45.2, "lon": -69.1},
-            zoom=6,
-            bounds=dict(
-                west=-71.5,
-                east=-66.8,
-                south=42.9,
-                north=47.6
-            )
-        ),
+        mapbox_style="streets",
         margin=dict(l=0, r=0, t=0, b=0),
     )
 
