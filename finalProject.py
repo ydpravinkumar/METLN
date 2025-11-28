@@ -73,7 +73,7 @@ if uploaded_files:
 
     # Filter data
     current = data[data["Status"].str.upper().isin(status_filter)].copy()
-
+    current.to_csv("current.csv", index=False)
     # ----------------------------
     # Geocoder with Cache
     # ----------------------------
@@ -196,109 +196,81 @@ if uploaded_files:
 
     st.plotly_chart(fig3, use_container_width=True)
 
-    # ----------------------------
-    # 4: Subscribers Over Time by Subscription Type
-    # ----------------------------
-#     st.subheader("📈 Subscribers Over Time by Subscription Type")
-#
-#     subsTimeType = (
-#         valid.groupby(["YearMonth", "SubType"])["AccoutID"]
-#         .nunique()
-#         .reset_index()
-#     )
-#
-#     pivot = subsTimeType.pivot(
-#         index="YearMonth",
-#         columns="SubType",
-#         values="AccoutID"
-#     ).fillna(0)
-#
-#     fig4 = px.line(
-#         pivot,
-#         x=pivot.index.astype(str),
-#         y=pivot.columns,
-#         labels={"x": "Year-Month", "value": "Subscribers"},
-#     )
-#     st.plotly_chart(fig4, use_container_width=True)
-#
-# else:
-#     st.info("Upload one or more CSV/XLSX files to begin.")
-
 
 # ----------------------------
-# 4: Subscribers Over Time by Subscription Type (Improved)
+# 4: Subscribers Over Time by Subscription Type
 # ----------------------------
-st.subheader("📈 Subscribers Over Time by Subscription Type")
+    st.subheader("📈 Subscribers Over Time by Subscription Type")
 
-# Aggregate unique subscribers per month per type
-subsTimeType = (
-    valid.groupby(["YearMonth_dt", "SubType"])["AccoutID"]
-    .nunique()
-    .reset_index()
-)
-
-# Create continuous monthly index
-all_months = pd.date_range(
-    start=subsTimeType["YearMonth_dt"].min(),
-    end=subsTimeType["YearMonth_dt"].max(),
-    freq="MS"
-)
-
-# Pivot and reindex to create uniform monthly timeline
-pivot = subsTimeType.pivot(
-    index="YearMonth_dt",
-    columns="SubType",
-    values="AccoutID"
-).reindex(all_months).fillna(0)
-
-pivot.index.name = "YearMonth"
-
-# Optional: 3-month smoothing
-pivot_smooth = pivot.rolling(3, center=True).mean()
-
-# Define a clean color palette
-color_map = {
-    "Digital": "#1f77b4",   # blue
-    "Print": "#ff7f0e",     # orange
-    "Bundle": "#2ca02c",    # green
-    "Other": "#d62728",     # red
-}
-
-fig4 = px.line(
-    pivot,
-    x=pivot.index,
-    y=pivot.columns,
-    color_discrete_map=color_map,
-    labels={"value": "Subscribers", "YearMonth": "Year-Month"},
-    title="Subscribers Over Time by Subscription Type"
-)
-
-# Add smoothed lines as dotted overlays
-for col in pivot.columns:
-    fig4.add_scatter(
-        x=pivot_smooth.index,
-        y=pivot_smooth[col],
-        mode="lines",
-        name=f"{col} (3-mo avg)",
-        line=dict(width=3, dash="dot", color=color_map[col]),
-        showlegend=False  # or True if you want them separate
+    # Aggregate unique subscribers per month per type
+    subsTimeType = (
+        valid.groupby(["YearMonth_dt", "SubType"])["AccoutID"]
+        .nunique()
+        .reset_index()
     )
 
-fig4.update_layout(
-    template="plotly_white",
-    height=500,
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1
-    ),
-    xaxis=dict(
-        tickformat="%b\n%Y",
-        dtick="M3",
-        showgrid=True
+    # Create continuous monthly index
+    all_months = pd.date_range(
+        start=subsTimeType["YearMonth_dt"].min(),
+        end=subsTimeType["YearMonth_dt"].max(),
+        freq="MS"
     )
-)
 
-st.plotly_chart(fig4, use_container_width=True)
+    # Pivot and reindex to create uniform monthly timeline
+    pivot = subsTimeType.pivot(
+        index="YearMonth_dt",
+        columns="SubType",
+        values="AccoutID"
+    ).reindex(all_months).fillna(0)
+
+    pivot.index.name = "YearMonth"
+
+    # Optional: 3-month smoothing
+    pivot_smooth = pivot.rolling(3, center=True).mean()
+
+    # Define a clean color palette
+    color_map = {
+        "Digital": "#1f77b4",   # blue
+        "Print": "#ff7f0e",     # orange
+        "Bundle": "#2ca02c",    # green
+        "Other": "#d62728",     # red
+    }
+
+    fig4 = px.line(
+        pivot,
+        x=pivot.index,
+        y=pivot.columns,
+        color_discrete_map=color_map,
+        labels={"value": "Subscribers", "YearMonth": "Year-Month"},
+        title="Subscribers Over Time by Subscription Type"
+    )
+
+    # Add smoothed lines as dotted overlays
+    for col in pivot.columns:
+        fig4.add_scatter(
+            x=pivot_smooth.index,
+            y=pivot_smooth[col],
+            mode="lines",
+            name=f"{col} (3-mo avg)",
+            line=dict(width=3, dash="dot", color=color_map[col]),
+            showlegend=False  # or True if you want them separate
+        )
+
+    fig4.update_layout(
+        template="plotly_white",
+        height=500,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        xaxis=dict(
+            tickformat="%b\n%Y",
+            dtick="M3",
+            showgrid=True
+        )
+    )
+
+    st.plotly_chart(fig4, use_container_width=True)
