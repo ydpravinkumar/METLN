@@ -145,7 +145,7 @@ if uploaded_files:
     valid["YearMonth_dt"] = valid["YearMonth"].dt.to_timestamp()
 
     # Filter by date range
-    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2018-01-01")]
+    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2020-01-01")]
 
     # --- FIXED: Unique subscribers per month ---
     monthly = (
