@@ -73,7 +73,20 @@ if uploaded_files:
 
     # Filter data
     current = data[data["Status"].str.upper().isin(status_filter)].copy()
-    current.to_csv("current.csv", index=False)
+    # ----------------------------------------
+    # DOWNLOAD FINAL CLEANED FILE (current)
+    # ----------------------------------------
+    st.subheader("⬇️ Download Final Cleaned File")
+
+    final_csv = current.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="Download Final Cleaned Dataset (current.csv)",
+        data=final_csv,
+        file_name="final_cleaned_subscribers.csv",
+        mime="text/csv"
+    )
+
     # ----------------------------
     # Geocoder with Cache
     # ----------------------------
