@@ -133,33 +133,6 @@ if uploaded_files:
     st.plotly_chart(fig_bar, use_container_width=True)
 
     # ----------------------------
-    # 3: Subscribers Over Time
-    # ----------------------------
-    # st.subheader("📈 Unique Subscribers Over Time")
-    #
-    # valid = data.dropna(subset=["LastStartDate"]).copy()
-    # valid["YearMonth"] = valid["LastStartDate"].dt.to_period("M")
-    # valid["YearMonth_dt"] = valid["YearMonth"].dt.to_timestamp()
-    #
-    # # Filter from 2018 onwards
-    # valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2020-01-01")]
-    #
-    # subsOverTime = (
-    #     valid.groupby(["YearMonth", "AccoutID"])
-    #     .size()
-    #     .reset_index(name="num_accounts")
-    # )
-    #
-    # fig3 = px.line(
-    #     subsOverTime,
-    #     x=subsOverTime["YearMonth"].astype(str),
-    #     y="num_accounts",
-    #     labels={"x": "Year-Month", "num_accounts": "Unique Subscribers"},
-    # )
-    #
-    # st.plotly_chart(fig3, use_container_width=True)
-
-    # ----------------------------
     # 3: Subscribers Over Time (Improved)
     # ----------------------------
     st.subheader("📈 Unique Subscribers Over Time")
@@ -172,7 +145,7 @@ if uploaded_files:
     valid["YearMonth_dt"] = valid["YearMonth"].dt.to_timestamp()
 
     # Filter by date range
-    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2020-01-01")]
+    valid = valid[valid["YearMonth_dt"] >= pd.Timestamp("2018-01-01")]
 
     # --- FIXED: Unique subscribers per month ---
     monthly = (
@@ -191,7 +164,7 @@ if uploaded_files:
     monthly = monthly.reindex(all_months, fill_value=0)
     monthly.index.name = "YearMonth"
 
-    # --- Optional 3-month smoothing ---
+    # --- 3-month smoothing ---
     monthly_smooth = monthly.rolling(window=3, center=True).mean()
 
     # --- Final plotted figure ---
@@ -226,27 +199,106 @@ if uploaded_files:
     # ----------------------------
     # 4: Subscribers Over Time by Subscription Type
     # ----------------------------
-    st.subheader("📈 Subscribers Over Time by Subscription Type")
+#     st.subheader("📈 Subscribers Over Time by Subscription Type")
+#
+#     subsTimeType = (
+#         valid.groupby(["YearMonth", "SubType"])["AccoutID"]
+#         .nunique()
+#         .reset_index()
+#     )
+#
+#     pivot = subsTimeType.pivot(
+#         index="YearMonth",
+#         columns="SubType",
+#         values="AccoutID"
+#     ).fillna(0)
+#
+#     fig4 = px.line(
+#         pivot,
+#         x=pivot.index.astype(str),
+#         y=pivot.columns,
+#         labels={"x": "Year-Month", "value": "Subscribers"},
+#     )
+#     st.plotly_chart(fig4, use_container_width=True)
+#
+# else:
+#     st.info("Upload one or more CSV/XLSX files to begin.")
 
-    subsTimeType = (
-        valid.groupby(["YearMonth", "SubType"])["AccoutID"]
-        .nunique()
-        .reset_index()
+
+# ----------------------------
+# 4: Subscribers Over Time by Subscription Type (Improved)
+# ----------------------------
+st.subheader("📈 Subscribers Over Time by Subscription Type")
+
+# Aggregate unique subscribers per month per type
+subsTimeType = (
+    valid.groupby(["YearMonth_dt", "SubType"])["AccoutID"]
+    .nunique()
+    .reset_index()
+)
+
+# Create continuous monthly index
+all_months = pd.date_range(
+    start=subsTimeType["YearMonth_dt"].min(),
+    end=subsTimeType["YearMonth_dt"].max(),
+    freq="MS"
+)
+
+# Pivot and reindex to create uniform monthly timeline
+pivot = subsTimeType.pivot(
+    index="YearMonth_dt",
+    columns="SubType",
+    values="AccoutID"
+).reindex(all_months).fillna(0)
+
+pivot.index.name = "YearMonth"
+
+# Optional: 3-month smoothing
+pivot_smooth = pivot.rolling(3, center=True).mean()
+
+# Define a clean color palette
+color_map = {
+    "Digital": "#1f77b4",   # blue
+    "Print": "#ff7f0e",     # orange
+    "Bundle": "#2ca02c",    # green
+    "Other": "#d62728",     # red
+}
+
+fig4 = px.line(
+    pivot,
+    x=pivot.index,
+    y=pivot.columns,
+    color_discrete_map=color_map,
+    labels={"value": "Subscribers", "YearMonth": "Year-Month"},
+    title="Subscribers Over Time by Subscription Type"
+)
+
+# Add smoothed lines as dotted overlays
+for col in pivot.columns:
+    fig4.add_scatter(
+        x=pivot_smooth.index,
+        y=pivot_smooth[col],
+        mode="lines",
+        name=f"{col} (3-mo avg)",
+        line=dict(width=3, dash="dot", color=color_map[col]),
+        showlegend=False  # or True if you want them separate
     )
 
-    pivot = subsTimeType.pivot(
-        index="YearMonth",
-        columns="SubType",
-        values="AccoutID"
-    ).fillna(0)
-
-    fig4 = px.line(
-        pivot,
-        x=pivot.index.astype(str),
-        y=pivot.columns,
-        labels={"x": "Year-Month", "value": "Subscribers"},
+fig4.update_layout(
+    template="plotly_white",
+    height=500,
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    ),
+    xaxis=dict(
+        tickformat="%b\n%Y",
+        dtick="M3",
+        showgrid=True
     )
-    st.plotly_chart(fig4, use_container_width=True)
+)
 
-else:
-    st.info("Upload one or more CSV/XLSX files to begin.")
+st.plotly_chart(fig4, use_container_width=True)
